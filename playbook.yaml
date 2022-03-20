@@ -1,0 +1,70 @@
+- name: Install required software for aipc server
+  hosts: all
+  tasks:
+  - name: Install pre-requisites
+    apt:
+       update_cache: yes
+       name: "{{ item }}"
+       state: latest
+    loop:
+    - ca-certificates
+    - curl 
+    - gnupg
+    - lsb-release
+    - git
+    - tmux
+
+  - name: Add keys
+    apt_key:
+       url: "{{ item }}"
+       state: present
+    loop:
+    - https://apt.releases.hashicorp.com/gpg
+    - https://download.docker.com/linux/ubuntu/gpg
+    - https://cli.github.com/packages/githubcli-archive-keyring.gpg
+
+  - name: Add repositories
+    apt_repository:
+       repo: "{{ item }}"
+       state: present
+    loop:
+    - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+    - "deb [arch=amd64] https://apt.releases.hashicorp.com focal main"
+    - "deb [arch=amd64] https://cli.github.com/packages stable main"
+
+  - name: Install terraform, packer, gh and docker
+    apt:
+       update_cache: yes
+       name: "{{ item }}"
+       state: latest
+    loop:
+    - terraform
+    - packer 
+    - gh 
+    - docker-ce 
+    - docker-ce-cli 
+    - containerd.io
+
+  - name: Add docker group to user
+    user:
+       name: root
+       groups: docker
+       append: yes
+       state: present
+
+  - name: Enable and start docker
+    systemd:
+       name: docker
+       daemon_reload: true
+       enabled: true
+       state: restarted
+
+  - name: Update all packages and remove obsolete packages
+    apt:
+       name: "*"
+       autoremove: true
+       state: latest
+
+  - name: Reboot machine after update
+    reboot:
+       pre_reboot_delay: 15
