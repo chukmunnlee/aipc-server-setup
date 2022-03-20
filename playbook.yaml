@@ -1,5 +1,11 @@
 - name: Install required software for aipc server
   hosts: all
+  vars:
+     repos:
+     - "deb [arch={{ arch.stdout }}] https://download.docker.com/linux/ubuntu {{ dist.stdout }} stable"
+     - "deb [arch={{ arch.stdout }}] https://apt.releases.hashicorp.com {{ dist.stdout }} main"
+     - "deb [arch={{ arch.stdout }}] https://cli.github.com/packages stable main"
+
   tasks:
   - name: Install pre-requisites
     apt:
@@ -23,14 +29,19 @@
     - https://download.docker.com/linux/ubuntu/gpg
     - https://cli.github.com/packages/githubcli-archive-keyring.gpg
 
+  - name: Get distribution name
+    command: lsb_release -cs
+    register: dist
+
+  - name: Get platform architecture
+    command: dpkg --print-architecture
+    register: arch
+
   - name: Add repositories
     apt_repository:
        repo: "{{ item }}"
        state: present
-    loop:
-    - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-    - "deb [arch=amd64] https://apt.releases.hashicorp.com focal main"
-    - "deb [arch=amd64] https://cli.github.com/packages stable main"
+    loop: "{{ repos }}"
 
   - name: Install terraform, packer, gh and docker
     apt:
