@@ -5,6 +5,7 @@
      - "deb [arch={{ arch.stdout }}] https://download.docker.com/linux/ubuntu {{ dist.stdout }} stable"
      - "deb [arch={{ arch.stdout }}] https://apt.releases.hashicorp.com {{ dist.stdout }} main"
      - "deb [arch={{ arch.stdout }}] https://cli.github.com/packages stable main"
+     - "ppa:ansible/ansible"
 
   tasks:
   - name: Install pre-requisites
@@ -55,6 +56,7 @@
     - docker-ce 
     - docker-ce-cli 
     - containerd.io
+    - ansible
 
   - name: Add docker group to user
     user:
